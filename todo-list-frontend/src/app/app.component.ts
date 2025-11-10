@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {Todo, TodoService} from "./todo.service";
-import {BehaviorSubject, combineLatest, Observable} from "rxjs";
-import { map, startWith } from 'rxjs/operators';
+import {BehaviorSubject, combineLatest, Observable, of} from "rxjs";
+import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -21,9 +21,11 @@ import { map, startWith } from 'rxjs/operators';
         placeholder="Type to filter todos"
       />
       <app-progress-bar *ngIf="loading$ | async"></app-progress-bar>
+      <p class="deletionMessage">Click on a todo to remove it.</p>
       <app-todo-item
         *ngFor="let todo of (filteredTodos$ | async) ?? []"
         [item]="todo"
+        (remove)="onRemove($event)"
       ></app-todo-item>
     </div>
   `,
@@ -35,10 +37,22 @@ export class AppComponent {
   filteredTodos$: Observable<Todo[]>;
   loading$: Observable<boolean>;
   search$ = new BehaviorSubject<string>('');
+  refresh$ = new BehaviorSubject<void>(undefined);
+  deletionMessage = "Click on a todo to remove it.";
 
 
-  constructor(todoService: TodoService) {    
-    this.todos$ = todoService.getAll();
+  constructor(private todoService: TodoService) {    
+    this.todos$ = this.refresh$.pipe(
+      switchMap(() =>
+        this.todoService.getAll().pipe(
+          catchError(err => {
+            this.deletionMessage = 'Failed to load todos.';
+            console.error(err);
+            return of([]);
+          })
+        )
+      )
+    );
 
     this.loading$ = this.todos$.pipe(map(() => false), startWith(true));
 
@@ -53,5 +67,9 @@ export class AppComponent {
   onInput(event: Event) {
     const value = (event.target as HTMLInputElement)?.value ?? '';
     this.search$.next(value);
+  }
+
+  onRemove(todo: Todo) {
+    this.refresh$.next();
   }
 }
