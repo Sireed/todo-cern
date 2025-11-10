@@ -8,8 +8,14 @@ allprojects {
     }
 
     buildscript {
+        ext {
+            springBootVersion = findProperty('springBootVersion') ?: '2.3.0'
+        }
         repositories {
             mavenCentral()
+        }
+        dependencies {
+            classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
         }
     }
 }
@@ -18,12 +24,16 @@ subprojects {
 
     apply plugin: "java"
     apply plugin: "maven"
+    apply plugin: 'org.springframework.boot'
 
     group "com.todo"
-    version = version
+    version = rootProject.version
 
     repositories {
         mavenCentral()
     }
 
+    ext {
+        springBootVersion = rootProject.ext.springBootVersion
+    }
 }

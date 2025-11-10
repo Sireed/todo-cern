@@ -1,8 +1,10 @@
 {
- "/api/*": {
-   "target": "https://localhost:8099",
-   "secure": false,
-   "logLevel": "debug",
-   "timeout": 1200000
+  "/api": {
+    "target": "http://backend:8099",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "timeout": 1200000
+  }
  }
-}
+ 

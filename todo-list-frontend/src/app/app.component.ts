@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {Todo, TodoService} from "./todo.service";
 import {Observable} from "rxjs";
+import { map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,7 @@ import {Observable} from "rxjs";
     <div class="list">
       <label for="search">Search...</label>
       <input id="search" type="text">
-      <app-progress-bar></app-progress-bar>
+      <app-progress-bar *ngIf="loading$ | async"></app-progress-bar>
       <app-todo-item *ngFor="let todo of todos$ | async" [item]="todo"></app-todo-item>
     </div>
   `,
@@ -22,8 +23,12 @@ import {Observable} from "rxjs";
 export class AppComponent {
 
   readonly todos$: Observable<Todo[]>;
+  loading$: Observable<boolean>;
 
-  constructor(todoService: TodoService) {
+
+  constructor(todoService: TodoService) {    
     this.todos$ = todoService.getAll();
+
+    this.loading$ = this.todos$.pipe(map(() => false), startWith(true));
   }
 }
