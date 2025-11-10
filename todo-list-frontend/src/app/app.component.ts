@@ -21,7 +21,7 @@ import { catchError, map, startWith, switchMap } from 'rxjs/operators';
         placeholder="Type to filter todos"
       />
       <app-progress-bar *ngIf="loading$ | async"></app-progress-bar>
-      <p class="deletionMessage">Click on a todo to remove it.</p>
+      <p class="deletionMessage">{{ deletionMessage }}</p>
       <app-todo-item
         *ngFor="let todo of (filteredTodos$ | async) ?? []"
         [item]="todo"
@@ -64,6 +64,7 @@ export class AppComponent {
       )
     );
   }
+  
   onInput(event: Event) {
     const value = (event.target as HTMLInputElement)?.value ?? '';
     this.search$.next(value);
